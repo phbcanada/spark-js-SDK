@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Spark Sample Application</title>
+        <meta charset="utf-8">
+        <!-- Bootstrap core CSS -->
+        <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+
+        <style>
+            #login-button, #logout-button{display: none}
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="col-md-8 col-md-offset-3">
+                <div id="welcome-wrapper">
+                    <h4>Spark SDK Authentication Sample</h4>
+
+                    <div class="col-md-10 col-md-offset-1">
+                        <p>Guest Token: <span id="guest-token-span">none</span></p>
+                        <p>Access Token: <span id="access-token-span">none</span></p>
+
+                        <button id="login-button" class="btn btn-primary">Login</button>
+                        <button id="logout-button" class="btn btn-danger">Logout</button>
+                        <button id="guest-button" class="btn btn-primary">Get Guest Token</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="container">
+            <div class="col-md-8 col-md-offset-3">
+                <div id="test-wrapper-register-printer">
+                    <h4>Spark SDK Register Printer</h4>
+
+                    <div class="col-md-10 col-md-offset-1">
+                        <form id="register-form">
+                              <label>Printer Code: </label><input type="text" id="code" name="code" class="required">
+                              <label>Name: </label><input type="text" id="name" name="name" class="required">
+                        </form><button id="reg" class="btn btn-primary">Register Printer</button>
+                        <p>
+                        <pre id="reg-log"></pre>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="container">
+            <div class="col-md-8 col-md-offset-3">
+                <div id="test-wrapper-printer-list">
+                    <h4>Spark SDK Printers</h4>
+
+                    <div class="col-md-10 col-md-offset-1">
+                        <button id="printers" class="btn btn-primary">Get Registered Printers</button>
+                        <p>
+                        <pre id="printer-list"></pre>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="container">
+            <div class="col-md-8 col-md-offset-3">
+                <div id="test-wrapper-jobs-list">
+                    <h4>Spark SDK Jobs</h4>
+
+                    <div class="col-md-10 col-md-offset-1">
+                        <button id="jobs" class="btn btn-primary">Get Users Print Jobs</button>&nbsp;
+                        <button id="pjobs" class="btn btn-primary">Get Printer Jobs</button>
+                          <label> Printer ID: </label><input type="text" id="printerid" name="printerid" class="required" size=12><br>
+                        <p>
+                        <pre id="job-list"></pre>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="container">
+            <div class="col-md-8 col-md-offset-3">
+                <div id="test-wrapper-job">
+                    <h4>Spark SDK Create/Update Print Job</h4>
+
+                    <div class="col-md-10 col-md-offset-1">
+                        <form id="job-form">
+                              <label>Printer ID: </label><input type="text" id="printerId" name="printerId" class="required"><br>
+                              <label>Profile ID: </label><input type="text" id="profileId" name="profileId" class="required" size=44 value="34F0E39A-9389-42BA-AB5A-4F2CD59C98E4"><br>
+                              <label>Printable ID: </label><input type="text" id="printableId" name="printableId" class="required"><br>
+                              <label>Job ID: </label><input type="text" id="jobid" name="jobid" class="required" size=44><br>
+                              <label>Status:&nbsp;</label><input type="radio" id="status" name="status" value="success" checked/> Success
+                                                          <input type="radio" id="status" name="status" value="failed"/> Failure
+                                                          <input type="radio" id="status" name="status" value=""/> Undefined<br>
+                              <label>Comment: </label><input type="text" id="comment" name="comment" class="required" size=100><br>
+                              <label>MyAppData: </label><input type="text" id="custom" name="custom" class="required" size=100>
+                        </form><br>
+                        <button id="job" class="btn btn-primary">Create Job</button>&nbsp;
+                        <button id="setprintable" class="btn btn-primary">Set Printable</button>&nbsp;
+                        <button id="setprinter" class="btn btn-primary">Set Printer</button>&nbsp;
+                        <button id="getstatus" class="btn btn-primary">Job Status</button><br>
+                        <button id="addcomment" class="btn btn-primary">Update Status / Comment</button>
+                        <p>
+                        <pre id="job-log"></pre>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- /container -->
+
+        <script type="text/javascript" charset="utf-8" src="//code.jquery.com/jquery-2.1.3.min.js"></script>
+
+        <!-- spark sdk -->
+        <!-- TODO: For now include the source directly. Change this to installed minified source file -->
+        <script type="text/javascript" charset="utf-8" src="utilities/Helpers.js"></script>
+        <script type="text/javascript" charset="utf-8" src="utilities/Paginated.js"></script>
+        <script type="text/javascript" charset="utf-8" src="utilities/Request.js"></script>
+        <script type="text/javascript" charset="utf-8" src="Client.js"></script>
+        <script type="text/javascript" charset="utf-8" src="PrintDB.js"></script>
+        <script type="text/javascript" charset="utf-8" src="Printer.js"></script>
+        <script type="text/javascript" charset="utf-8" src="MeshAPI.js"></script>
+        <script type="text/javascript" charset="utf-8" src="TrayAPI.js"></script>
+        <script type="text/javascript" charset="utf-8" src="Job.js"></script>
+        <script type="text/javascript" charset="utf-8" src="Tasks.js"></script>
+        <!-- end spark sdk -->
+
+        <script>
+            var APP_KEY = ''; // Your app key
+            var API_ROOT = 'sandbox';  // Use 'sandbox' for testing and 'api' for production.
+
+            APP_KEY = 'EvGjq7G0bC4XLK4NZyLVsK16ZzSuX14l';   // DO NOT COMMIT!!!
+            API_ROOT = 'api-alpha';                         // DO NOT COMMIT!!!
+
+            // The guest token endpoint that is implemented by your server (i.e. http://example.com/guest_token)
+            var GUEST_TOKEN_URL = 'http://localhost:3000/guest_token';
+            // The access token endpoint that is implemented by your server (i.e. http://example.com/access_token)
+            var ACCESS_TOKEN_URL = 'http://localhost:3000/access_token';
+            // The refresh token endpoint that is implemented by your server (i.e. http://example.com/refresh_token)
+            var REFRESH_TOKEN_URL = 'http://localhost:3000/refresh_token';
+
+            /**
+             * Get the code param in URL after returning from Spark Auth flow
+             */
+            function extractRedirectionCode() {
+                var getParams = ADSKSpark.Helpers.extractParamsFromURL();
+                return getParams['code'] ? getParams['code'] : null;
+            }
+
+            /**
+             * Run when DOM is ready.
+             * The spark object already exists in this point
+             */
+            jQuery(function ($) {
+                var MeshAPI = ADSKSpark.MeshAPI;
+                var TrayAPI = ADSKSpark.TrayAPI;
+                var Client  = ADSKSpark.Client;
+
+                var API_URL = 'https://' + API_ROOT + '.spark.autodesk.com/api/v1';
+
+                var _meshID = null;
+                var _printerTypes = null;
+
+                Client.initialize(APP_KEY, GUEST_TOKEN_URL, ACCESS_TOKEN_URL, REFRESH_TOKEN_URL, API_URL);
+
+                //First let's see if we have a valid access token
+                if (Client.isAccessTokenValid()) {
+                    $('#access-token-span').text(Client.getAccessToken());
+                    $('#logout-button').show();
+
+                    // Use Test server once logged in:
+                    var TEST_URL = 'http://localhost.autodesk.com:8080/api/v1';  // DO NOT COMMIT!!!
+                    ADSKSpark._injectMemberID = "20440630";
+                    Client._switchApiURL(TEST_URL);
+
+                } else {//user needs to login
+                    $('#login-button').show();
+                    //if we get back from the login service
+                    var code = extractRedirectionCode();
+
+                    if (code) {
+                        Client.completeLogin(code).then(function (token) {
+                            console.log('Completed login with token: ' + token);
+                            if (token) {
+                                //You can redirect now to some page in your app or to homepage
+                                // or to reload the top window or any other action
+                                window.location.reload();
+                            } else {
+                                console.error('Problem with fetching token');
+                            }
+                        }, function (error) {
+                            console.error(error.message);
+                        });
+                    }
+                }
+
+                // Register buttons
+                $('#login-button').click(function() {
+                    window.location = Client.getLoginRedirectUrl();
+                });
+
+                $('#logout-button').click(function() {
+                    Client.logout();
+                    window.location.reload();
+                });
+
+                $('#guest-button').click(function() {
+                    Client.getGuestToken().then(function(token) {
+                        $('#guest-token-span').text(token);
+                    });
+                });
+
+                $('#reg').click(function(event) {
+                    var code = $('#code').val();
+                    var name = $('#name').val();
+
+                    if( !code || !name ) {
+                        $('#reg-log').append('<b>Both printer code and name must be provided.</b>\n');
+                    }
+                    else {
+                        $('#reg-log').append('<b>Registering...<\b>');
+                        ADSKSpark.Printer.register(name, code) .then(function(printer) {
+                                $('#reg-log').append('\nRegistered ID: ' + printer.printer_id);
+                        })
+                        .catch(function(err) {
+                            var report = '<b>ERROR:</b> ' + err.message + '\n';
+                            if( err.responseText )
+                                report += '<b>Response:</b> ' + err.responseText + '\n';
+                            $('#reg-log').append(report);
+                        });
+                    }
+                });
+
+                $('#printers').click(function() {
+                    ADSKSpark.Printers.get().then(function(printers) {
+                        if( printers.length === 0 ) {
+                            $('#printer-list').append('No Printers Found\n');
+                        } else {
+                            var report = '';
+                            printers.forEach(function (printer) {
+                                report += '<b>Printer[' + printer.printer_id + ']:</b> Name: ' + printer.printer_name
+                                    + ' Type: ' + printer.type_id
+                                    + ' Status: ' + printer.printer_last_health + '\n';
+                            });
+                            $('#printer-list').html(report);
+                        }
+                    })
+                    .catch( function(error) {
+                        $('#printer-list').text(error.message);
+                    });
+                });
+
+                $('#jobs').click(function() {
+                    ADSKSpark.Jobs.get().then(function(jobs) {
+                        if( jobs.length === 0 ) {
+                            $('#job-list').append('No Jobs Found\n');
+                        } else {
+                            var report = '';
+                            jobs.forEach(function(job) {
+                                report += '<b>Job[' + job.id + ']:</b>\n  Printer: ' + job.printer_id
+                                + '  Status: ' + job.status
+                                + '  Date: ' + job.data.job_date_time + '\n';
+                                if( job.data.job_comment )
+                                    report += '  Comment: ' + job.data.job_comment + '\n';
+                                if( job.data.job_custom_data )
+                                    report += '  Custom: ' + JSON.stringify(job.data.job_custom_data) + '\n';
+                            });
+                            $('#job-list').html(report);
+                        }
+                    })
+                    .catch( function(error) {
+                        $('#job-list').text(error.message);
+                    });
+                });
+
+                $('#pjobs').click(function() {
+                    var printerID   = $('#printerid').val();
+                    $('#job-list').text('');
+                    if( !printerID ) {
+                        $('#job-list').append('<b>Printer ID must be provided.</b>\n');
+                    }
+                    else {
+                        ADSKSpark.Jobs.getPrinter(printerID).then(function(jobs) {
+                            if( jobs.length === 0 ) {
+                                $('#job-list').append('No Jobs Found\n');
+                            } else {
+                                var report = '';
+                                jobs.forEach(function(job) {
+                                    report += '<b>Job[' + job.id + ']:</b>\n  Printer: ' + job.printer_id
+                                    + '  Status: ' + job.status
+                                    + '  Date: ' + job.data.job_date_time + '\n';
+                                    if( job.data.job_comment )
+                                        report += '  Comment: ' + job.data.job_comment + '\n';
+                                    if( job.data.job_custom_data )
+                                        report += '  Custom: ' + JSON.stringify(job.data.job_custom_data) + '\n';
+                                });
+                                $('#job-list').html(report);
+                            }
+                        })
+                        .catch( function(error) {
+                            $('#job-list').text(error.message);
+                        });
+                    }
+                });
+
+                $('#job').click(function(event) {
+                    var printerId = $('#printerId').val();
+                    var profileId = $('#profileId').val();
+                    var printableId = $('#printableId').val();
+
+                    // if( printerId && profileId && printableId ) {
+                    if( profileId ) {
+                        $('#job-log').text('Creating print job with printer="' + printerId.toString() + '" printable="' + printableId.toString() + '"\n');
+                        _printJob = new ADSKSpark.Job();
+
+                        _printJob.createWithProfile(profileId, printerId, printableId)
+                            .then(function(job) {
+                                var report = '<b>Job ID:</b> ' + job.id + '\n Status: ' + job.status + ' Progress: ' + job.progress + '\n';
+                                $('#job-log').append(report);
+                                $('#jobid').val(job.id);
+                            })
+                            .catch(function(err) {
+                                var report = '<b>ERROR:</b> ' + err.message + '\n';
+                                if( err.responseText )
+                                    report += '<b>Response:</b> ' + err.responseText + '\n';
+
+                                $('#job-log').append(report);
+                            });
+                    }
+                    else {
+                        $('#job-log').append('<b>Must specify Printer, Profile and Printable IDs.</b>\n');
+                        $('#job-log').append('<b>Use Generate Printable to get a Printable ID.</b>\n');
+                    }
+                });
+
+                $('#setprintable').click(function() {
+                    var jobID   = $('#jobid').val();
+                    var printableId = $('#printableId').val();
+
+                    function checkJobID() {
+                        // To check the job ID we create a Job object and then try
+                        // to get its status. The getStatus promise will be rejected
+                        // if the id is not valid:
+                        var printJob = new ADSKSpark.Job();
+                        printJob.id = jobID;
+                        return printJob.getStatus();
+                    }
+
+                    if( !jobID || !printableId ) {
+                        $('#job-log').html('<b>Both Job ID and Printable ID must be set.</b>\n');
+                    }
+                    else {
+                        $('#job-log').html('Checking ID: ' + jobID + '... ');
+                        checkJobID()
+                        .then(function(job) {
+                            $('#job-log').append('\nCalling setPrintable... ');
+                            return job.setPrintable(printableId);
+                        })
+                        .then(function(job) {
+                                $('#job-log').append('\nCompleted.');
+                                $('#job-log').append('\njob_status: ' + job.status);
+                                $('#job-log').append('\nprinter_id: ' + job.printer_id);
+                                $('#job-log').append('\njob_data: ' + JSON.stringify(job.data));
+                        })
+                        .catch(function(err) {
+                            var report = '<b>ERROR:</b> ' + err.message + '\n';
+                            if( err.responseText )
+                                report += '<b>Response:</b> ' + err.responseText + '\n';
+                            $('#job-log').append(report);
+                        });
+                    }
+                });
+
+                $('#setprinter').click(function() {
+                    var jobID   = $('#jobid').val();
+                    var printerId = $('#printerId').val();
+
+                    function checkJobID() {
+                        // To check the job ID we create a Job object and then try
+                        // to get its status. The getStatus promise will be rejected
+                        // if the id is not valid:
+                        var printJob = new ADSKSpark.Job();
+                        printJob.id = jobID;
+                        return printJob.getStatus();
+                    }
+
+                    if( !jobID || !printerId ) {
+                        $('#job-log').html('<b>Both Job ID and Printer ID must be set.</b>\n');
+                    }
+                    else {
+                        $('#job-log').html('Checking ID: ' + jobID + '... ');
+                        checkJobID()
+                        .then(function(job) {
+                            $('#job-log').append('\nCalling setPrinter... ');
+                            return job.setPrinter(printerId);
+                        })
+                        .then(function(job) {
+                                $('#job-log').append('\nCompleted.');
+                                $('#job-log').append('\njob_status: ' + job.status);
+                                $('#job-log').append('\nprinter_id: ' + job.printer_id);
+                                $('#job-log').append('\njob_data: ' + JSON.stringify(job.data));
+                        })
+                        .catch(function(err) {
+                            var report = '<b>ERROR:</b> ' + err.message + '\n';
+                            if( err.responseText )
+                                report += '<b>Response:</b> ' + err.responseText + '\n';
+                            $('#job-log').append(report);
+                        });
+                    }
+                });
+
+                $('#getstatus').click(function() {
+                    var jobID   = $('#jobid').val();
+
+                    if( !jobID ) {
+                        $('#job-log').append('<b>Job ID must be provided.</b>\n');
+                    }
+                    else {
+                        $('#job-log').append('Checking ID: ' + jobID + '... ');
+
+                        // To check the job ID we create a Job object and then try
+                        // to get its status. The getStatus promise will be rejected
+                        // if the id is not valid:
+                        var printJob = new ADSKSpark.Job();
+                        printJob.id = jobID;
+                        printJob.getStatus()
+                        .then(function(job) {
+                            $('#job-log').append('\Status:');
+                            $('#job-log').append('\nprinter_id: ' + job.printer_id);
+                            $('#job-log').append('\njob_status: ' + job.status);
+                            $('#job-log').append('\njob_comment: ' + job.data.job_comment);
+                            $('#job-log').append('\njob_custom_data: ' + JSON.stringify(job.data.job_custom_data));
+                        })
+                        .catch(function(err) {
+                            var report = '<b>ERROR:</b> ' + err.message + '\n';
+                            if( err.responseText )
+                                report += '<b>Response:</b> ' + err.responseText + '\n';
+                            $('#job-log').append(report);
+                        });
+                    }
+                });
+
+                $('#addcomment').click(function() {
+                    var jobID   = $('#jobid').val();
+                    var status  = $('input[name=status]:checked', '#job-form').val();
+                    var comment = $('#comment').val();
+                    var custom  = {
+                        'myAppData': $('#custom').val(),
+                        'Fu': 'bar'
+                    };
+
+                    function checkJobID() {
+                        // To check the job ID we create a Job object and then try
+                        // to get its status. The getStatus promise will be rejected
+                        // if the id is not valid:
+                        var printJob = new ADSKSpark.Job();
+                        printJob.id = jobID;
+                        return printJob.getStatus();
+                    }
+
+                    if( !jobID ) {
+                        $('#job-log').append('<b>Job ID must be provided.</b>\n');
+                    }
+                    else {
+                        $('#job-log').append('Checking ID: ' + jobID + '... ');
+                        checkJobID()
+                        .then(function(job) {
+                            $('#job-log').append('\nUpdating job: ' + job.id + '... ');
+                            return job.updateStatus(status, comment, custom);
+                        })
+                        .then(function(job) {
+                            $('#job-log').append('\nUpdate completed.');
+                            $('#job-log').append('\njob_status: ' + job.status);
+                            $('#job-log').append('\njob_comment: ' + job.data.job_comment);
+                            $('#job-log').append('\njob_custom_data: ' + JSON.stringify(job.data.job_custom_data));
+                        })
+                        .catch(function(err) {
+                            var report = '<b>ERROR:</b> ' + err.message + '\n';
+                            if( err.responseText )
+                                report += '<b>Response:</b> ' + err.responseText + '\n';
+                            $('#job-log').append(report);
+                        });
+                    }
+                });
+
+            });
+        </script>
+    </body>
+</html>
