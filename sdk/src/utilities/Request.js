@@ -3,6 +3,8 @@ var ADSKSpark = ADSKSpark || {};
 (function () {
     'use strict';
 
+    ADSKSpark._injectMemberID = null;
+
     /**
      * @description // A wrapper for XHR requests that returns a promise.
      // Usage: ADSKSpark.Request('http://alpha.spark.autodesk.com/api/v1/print/printers').get([headers[, data]]).then(...);
@@ -85,6 +87,9 @@ var ADSKSpark = ADSKSpark || {};
                 if (options.withCredentials) {
                     xhr.withCredentials = true;
                 }
+
+                if (ADSKSpark._injectMemberID)
+                    xhr.setRequestHeader('X-Member-ID', ADSKSpark._injectMemberID);
 
                 xhr.onload = function () {
                     if (xhr.status === 200 || xhr.status === 201 || xhr.status === 202 || xhr.status === 204) {
