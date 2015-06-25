@@ -148,14 +148,6 @@
             var REFRESH_TOKEN_URL = 'http://localhost:3000/refresh_token';
 
             /**
-             * Get the code param in URL after returning from Spark Auth flow
-             */
-            function extractRedirectionCode() {
-                var getParams = ADSKSpark.Helpers.extractParamsFromURL();
-                return getParams['code'] ? getParams['code'] : null;
-            }
-
-            /**
              * Run when DOM is ready.
              * The spark object already exists in this point
              */
@@ -194,7 +186,8 @@
                 } else {//user needs to login
                     $('#login-button').show();
                     //if we get back from the login service
-                    var code = extractRedirectionCode();
+                    var urlParams = ADSKSpark.Helpers.extractParamsFromURL();
+                    var code = urlParams['code'] ? urlParams['code'] : null;
 
                     if (code) {
                         Client.completeLogin(code).then(function (token) {
