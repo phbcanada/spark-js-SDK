@@ -15,11 +15,11 @@
         <div class="container">
             <div class="col-md-6 col-md-offset-3">
                 <div id="welcome-wrapper">
-                    <h2>Spark SDK Authentication Sample</h2>
+                    <h3 id="title">Spark SDK Authentication Sample</h3>
 
                     <div class="col-md-10 col-md-offset-1" id="login">
-                        <p>Guest Token: <span id="guest-token-span">none</span></p>
-                        <p>Access Token: <span id="access-token-span">none</span></p>
+                        <p>Guest Token: <span id="guest-token-span">none</span><br>
+                        Access Token: <span id="access-token-span">none</span></p>
 
                         <button id="login-button" class="btn btn-primary">Login</button>
 	                    <button id="implicit-login-button" class="btn btn-primary">Implicit Login</button>
@@ -37,7 +37,7 @@
         <div class="container">
             <div class="col-md-6 col-md-offset-3">
                 <div id="test-wrapper-printer-types">
-                    <h2>Spark SDK Test</h2>
+                    <h4>Spark SDK Test</h4>
 
                     <div class="col-md-10 col-md-offset-1">
                         <button id="printer-types" class="btn btn-primary">Get Printer Types</button>
@@ -53,7 +53,7 @@
         <div class="container">
             <div class="col-md-6 col-md-offset-3">
                 <div id="test-wrapper-upload-file">
-                    <h2>Spark SDK Mesh Import Test</h2>
+                    <h4>Spark SDK Mesh Import Test</h4>
 
                     <div class="col-md-10 col-md-offset-1">
                         <form id="upload-form">
@@ -70,7 +70,7 @@
         <div class="container">
             <div class="col-md-6 col-md-offset-3">
                 <div id="test-wrapper-analyze-mesh">
-                    <h2>Spark SDK Mesh Analyze Test</h2>
+                    <h4>Spark SDK Mesh Analyze Test</h4>
 
                     <div class="col-md-10 col-md-offset-1">
                         <button id="analyze" class="btn btn-primary">Analyze Mesh</button>
@@ -85,7 +85,7 @@
         <div class="container">
             <div class="col-md-6 col-md-offset-3">
                 <div id="test-wrapper-analyze-mesh">
-                    <h2>Spark SDK Mesh Repair Test</h2>
+                    <h4>Spark SDK Mesh Repair Test</h4>
 
                     <div class="col-md-10 col-md-offset-1">
                         <button id="repair" class="btn btn-primary">Repair Mesh</button>
@@ -100,7 +100,7 @@
         <div class="container">
             <div class="col-md-6 col-md-offset-3">
                 <div id="test-wrapper-create-tray">
-                    <h2>Spark SDK Create Tray Test</h2>
+                    <h4>Spark SDK Create Tray Test</h4>
 
                     <div class="col-md-10 col-md-offset-1">
                         <button id="tray" class="btn btn-primary">Create Tray</button>
@@ -115,7 +115,7 @@
         <div class="container">
             <div class="col-md-6 col-md-offset-3">
                 <div id="test-wrapper-prepare-tray">
-                    <h2>Spark SDK Prepare Tray Test</h2>
+                    <h4>Spark SDK Prepare Tray Test</h4>
 
                     <div class="col-md-10 col-md-offset-1">
                         <button id="prepare" class="btn btn-primary">Prepare Tray</button>
@@ -130,7 +130,7 @@
         <div class="container">
             <div class="col-md-6 col-md-offset-3">
                 <div id="test-wrapper-prepare-tray">
-                    <h2>Spark SDK Generate Printable Test</h2>
+                    <h4>Spark SDK Generate Printable Test</h4>
 
                     <div class="col-md-10 col-md-offset-1">
                         <button id="printable" class="btn btn-primary">Generate Prinable</button>
@@ -145,7 +145,7 @@
         <div class="container">
             <div class="col-md-6 col-md-offset-3">
                 <div id="test-wrapper-job">
-                    <h2>Spark SDK Create Print Job Test</h2>
+                    <h4>Spark SDK Create Print Job Test</h4>
 
                     <div class="col-md-10 col-md-offset-1">
                         <form id="job-form">
@@ -165,7 +165,7 @@
         <div class="container">
             <div class="col-md-6 col-md-offset-3">
                 <div id="test-wrapper-jobs-list">
-                    <h2>Spark SDK Job Status Test</h2>
+                    <h4>Spark SDK Job Status Test</h4>
 
                     <div class="col-md-10 col-md-offset-1">
                         <button id="job-status" class="btn btn-primary">Get Print Job Status</button>
@@ -180,7 +180,7 @@
         <div class="container">
             <div class="col-md-6 col-md-offset-3">
                 <div id="test-wrapper-printer-list">
-                    <h2>Spark SDK Printers Test</h2>
+                    <h4>Spark SDK Printers Test</h4>
 
                     <div class="col-md-10 col-md-offset-1">
                         <button id="printers" class="btn btn-primary">Get Registered Printers</button>
@@ -195,7 +195,7 @@
         <div class="container">
             <div class="col-md-6 col-md-offset-3">
                 <div id="test-wrapper-jobs-list">
-                    <h2>Spark SDK Jobs Test</h2>
+                    <h4>Spark SDK Jobs Test</h4>
 
                     <div class="col-md-10 col-md-offset-1">
                         <button id="jobs" class="btn btn-primary">Get Users Print Jobs</button>
@@ -263,6 +263,8 @@
                 };
 
 	            Client.initialize(APP_KEY,options);
+
+                $('#title').append(' ('+Client.getApiName()+')');
 
                 //First let's see if we have a valid access token
                 if (Client.isAccessTokenValid()) {
