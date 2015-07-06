@@ -500,6 +500,7 @@
                                 var report = '\n<b>New Tray:</b> ' + tray.id + ' ' + tray.state + ' Ready: ' + tray.ready + '\n';
                                 $('#prepare-log').append(report);
                                 $('#prepare-log').append('Tray has ' + tray.meshes.length + ' meshes.\n');
+                                $('#prepare-log').append('Mesh Id: ' + tray.meshes[0].id + '\n');
                                 $('#prepare-log').append('Mesh visual: ' + tray.meshes[0].visual_file_id + '\n');
                             })
                             .catch(function(err) {
