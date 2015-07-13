@@ -36,7 +36,7 @@ module.exports = function (grunt) {
 					appConfig.src + '/Printer.js',
 					appConfig.src + '/*.js',
 					appConfig.src + '/drive/*.js'],
-				dest: appConfig.dist + '/<%= pkg.name %>-<%= version %>.min.js'
+				dest: appConfig.dist + '/<%= pkg.name %><%= version %>.min.js'
 			}
 		},
 		// Test settings
@@ -90,7 +90,20 @@ module.exports = function (grunt) {
 
 		var pkg = grunt.file.readJSON('package.json');
 
-		var buildVersion = version ? version : pkg.version;
+		var buildVersion;
+
+		switch (version){
+			case 'dist':
+				buildVersion = '';
+				break;
+			case 'latest':
+			case 'nightly':
+				buildVersion = '-' + version;
+				break;
+			default:
+				buildVersion = '-' + pkg.version;
+				break;
+		}
 
 		grunt.config.set('version', buildVersion);
 		grunt.task.run(['jshint:src','karma','uglify']);

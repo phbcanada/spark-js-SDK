@@ -3,8 +3,16 @@
   "description": "A web client SDK for the Spark REST APIs, providing a convenient interface for application developers, an abstract layer for the Spark APIs and a high-level functionality by chaining/callbacking APIs together",
   "version": "0.1.0",
   "author": "Autodesk, Inc.",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/spark3dp/spark-js-sdk"
+  },
   "license": "Apache 2.0",
-  "dependencies": {
-    "promise-polyfill":"~2.0.2"
-  }
+  "main": "sdk/dist/autodesk-spark-sdk.min.js",
+  "ignore": [
+    "sdk/node_modules",
+    "sdk/bower_components",
+    "sdk/test",
+    "sdk/jsdoc-conf"
+  ]
 }
