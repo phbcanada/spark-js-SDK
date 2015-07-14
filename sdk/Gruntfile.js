@@ -98,7 +98,7 @@ module.exports = function (grunt) {
 				break;
 			case 'latest':
 			case 'nightly':
-				buildVersion = '-' + version;
+				buildVersion = '-nightly';
 				break;
 			default:
 				buildVersion = '-' + pkg.version;
