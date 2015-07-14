@@ -122,6 +122,7 @@
         <script type="text/javascript" charset="utf-8" src="utilities/Helpers.js"></script>
         <script type="text/javascript" charset="utf-8" src="utilities/Paginated.js"></script>
         <script type="text/javascript" charset="utf-8" src="utilities/Request.js"></script>
+        <script type="text/javascript" charset="utf-8" src="config/Constants.js"></script>
         <script type="text/javascript" charset="utf-8" src="Client.js"></script>
         <script type="text/javascript" charset="utf-8" src="drive/Members.js"></script>
         <script type="text/javascript" charset="utf-8" src="PrintDB.js"></script>
@@ -134,11 +135,7 @@
 
         <script>
             var APP_KEY = ''; // Your app key
-            var API_ROOT = 'sandbox';  // Use 'sandbox' for testing and 'api' for production.
-
             APP_KEY = 'EvGjq7G0bC4XLK4NZyLVsK16ZzSuX14l';   // DO NOT COMMIT!!!
-            API_ROOT = 'sandbox';                         // DO NOT COMMIT!!!
-            API_ROOT = 'api-alpha';                         // DO NOT COMMIT!!!
 
             // The guest token endpoint that is implemented by your server (i.e. http://example.com/guest_token)
             var GUEST_TOKEN_URL = 'http://localhost:3000/guest_token';
@@ -146,6 +143,7 @@
             var ACCESS_TOKEN_URL = 'http://localhost:3000/access_token';
             // The refresh token endpoint that is implemented by your server (i.e. http://example.com/refresh_token)
             var REFRESH_TOKEN_URL = 'http://localhost:3000/refresh_token';
+
 
             /**
              * Run when DOM is ready.
@@ -156,14 +154,25 @@
                 var TrayAPI = ADSKSpark.TrayAPI;
                 var Client  = ADSKSpark.Client;
 
-                var API_URL = 'https://' + API_ROOT + '.spark.autodesk.com/api/v1';
-
                 var _meshID = null;
+                var _trayID = null;
+                var _preparedTrayID = null;
                 var _printerTypes = null;
+                var _printableFileID = null;
+                var _printJob = null;
+	            var isServerLogin = (window.location.search.indexOf('code') != -1);
 
-                $('#title').append(' ('+API_ROOT+')');
+                var options = {
+                    apiRoot: 'https://api-alpha.spark.autodesk.com/api/v1',
+                    isProduction:false,
+                    guestTokenUrl: GUEST_TOKEN_URL,
+                    accessTokenUrl: ACCESS_TOKEN_URL,
+                    refreshTokenUrl: REFRESH_TOKEN_URL
+                };
 
-                Client.initialize(APP_KEY, GUEST_TOKEN_URL, ACCESS_TOKEN_URL, REFRESH_TOKEN_URL, API_URL);
+	            Client.initialize(APP_KEY,options);
+
+                $('#title').append(' ('+Client.getApiName()+')');
 
                 //First let's see if we have a valid access token
                 if (Client.isAccessTokenValid()) {
@@ -177,33 +186,34 @@
                         $('#profile').text(report);
                         $('#login').append('<img src="' + data.member.profile.avatar_path + '"/>');
                     });
-
-                    // Use Test server once logged in:
-                    var TEST_URL = 'http://localhost.autodesk.com:8080/api/v1';  // DO NOT COMMIT!!!
-                    //===> ADSKSpark._injectMemberID = "20440630";
-                    //===> Client._switchApiURL(TEST_URL);
-
-                } else {//user needs to login
+                } else {
+                    //user needs to login
                     $('#login-button').show();
-                    //if we get back from the login service
-                    var urlParams = ADSKSpark.Helpers.extractParamsFromURL();
-                    var code = urlParams['code'] ? urlParams['code'] : null;
+	                $('#implicit-login-button').show();
 
-                    if (code) {
-                        Client.completeLogin(code).then(function (token) {
-                            console.log('Completed login with token: ' + token);
-                            if (token) {
-                                //You can redirect now to some page in your app or to homepage
-                                // or to reload the top window or any other action
-                                window.location.reload();
-                            } else {
-                                console.error('Problem with fetching token');
-                            }
-                        }, function (error) {
-                            console.error(error.message);
-                        });
-                    }
+		                Client.completeLogin(isServerLogin).then(function (token) {
+			                console.log('Completed login with token: ' + token);
+
+			                if (token) {
+				                //You can redirect now to some page in your app or to homepage
+				                // or to reload the top window or any other action
+				                window.location.reload();
+			                } else {
+				                console.error('Problem with fetching token');
+			                }
+
+		                }, function (error) {
+
+                            console.log("ERROR: " + JSON.stringify(error));
+			                console.error(error.message);
+			                $('#profile').text(error.message);
+		                });
+
+
+
+
                 }
+
 
                 // Register buttons
                 $('#login-button').click(function() {
