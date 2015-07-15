@@ -94,6 +94,8 @@
                               <label>Profile ID: </label><input type="text" id="profileId" name="profileId" class="required" size=44 value="34F0E39A-9389-42BA-AB5A-4F2CD59C98E4"><br>
                               <label>Printable ID: </label><input type="text" id="printableId" name="printableId" class="required"><br>
                               <label>Job ID: </label><input type="text" id="jobid" name="jobid" class="required" size=44><br>
+                              <label>Tray ID: </label><input type="text" id="trayid" name="trayid" class="required" size=44><br>
+                              <label>Mesh Path: </label><input type="text" id="meshpath" name="meshpath" class="required" size=44><br>
                               <label>Status:&nbsp;</label><input type="radio" id="status" name="status" value="success" checked/> Success
                                                           <input type="radio" id="status" name="status" value="failed"/> Failure
                                                           <input type="radio" id="status" name="status" value=""/> Undefined<br>
@@ -104,6 +106,8 @@
                         <button id="setprintable" class="btn btn-primary">Set Printable</button>&nbsp;
                         <button id="setprinter" class="btn btn-primary">Set Printer</button>&nbsp;
                         <button id="getstatus" class="btn btn-primary">Job Status</button><br>
+                        <button id="settray" class="btn btn-primary">Set Tray</button>
+                        <button id="setmeshes" class="btn btn-primary">Set Meshes</button>
                         <button id="addcomment" class="btn btn-primary">Update Status / Comment</button>
                         <p>
                         <pre id="job-log"></pre>
@@ -163,7 +167,7 @@
 	            var isServerLogin = (window.location.search.indexOf('code') != -1);
 
                 var options = {
-                    apiRoot: 'https://api-alpha.spark.autodesk.com/api/v1',
+                    // apiRoot: 'https://api-alpha.spark.autodesk.com/api/v1',
                     isProduction:false,
                     guestTokenUrl: GUEST_TOKEN_URL,
                     accessTokenUrl: ACCESS_TOKEN_URL,
@@ -186,6 +190,11 @@
                         $('#profile').text(report);
                         $('#login').append('<img src="' + data.member.profile.avatar_path + '"/>');
                     });
+
+                    // Use Test server once logged in:
+                    var TEST_URL = 'http://localhost.autodesk.com:8080/api/v1';  // DO NOT COMMIT!!!
+                    //===> ADSKSpark._injectMemberID = "20440630";
+                    //===> Client._switchApiURL(TEST_URL);
                 } else {
                     //user needs to login
                     $('#login-button').show();
@@ -451,6 +460,84 @@
                             $('#job-log').append('\njob_status: ' + job.status);
                             $('#job-log').append('\njob_comment: ' + job.data.job_comment);
                             $('#job-log').append('\njob_custom_data: ' + JSON.stringify(job.data.job_custom_data));
+                        })
+                        .catch(function(err) {
+                            var report = '<b>ERROR:</b> ' + err.message + '\n';
+                            if( err.responseText )
+                                report += '<b>Response:</b> ' + err.responseText + '\n';
+                            $('#job-log').append(report);
+                        });
+                    }
+                });
+
+                $('#settray').click(function() {
+                    var jobID   = $('#jobid').val();
+                    var trayID  = $('#trayid').val();
+
+                    function checkJobID() {
+                        // To check the job ID we create a Job object and then try
+                        // to get its status. The getStatus promise will be rejected
+                        // if the id is not valid:
+                        var printJob = new ADSKSpark.Job();
+                        printJob.id = jobID;
+                        return printJob.getStatus();
+                    }
+
+                    if( !jobID || !trayID ) {
+                        $('#job-log').html('<b>Job ID and Tray ID must be provided.</b>\n');
+                    }
+                    else {
+                        $('#job-log').html('Checking ID: ' + jobID + '... ');
+                        checkJobID()
+                        .then(function(job) {
+                            $('#job-log').append('\nCalling setSourceTray... ');
+                            return job.setSourceTray(trayID);
+                        })
+                        .then(function(job) {
+                                $('#job-log').append('\nCompleted.');
+                                $('#job-log').append('\njob_status: ' + job.status);
+                                $('#job-log').append('\nprinter_id: ' + job.printer_id);
+                                $('#job-log').append('\njob_data: ' + JSON.stringify(job.data));
+                                $('#job-log').append('\nsource_tray: ' + JSON.stringify(job.getSourceTray()));
+                        })
+                        .catch(function(err) {
+                            var report = '<b>ERROR:</b> ' + err.message + '\n';
+                            if( err.responseText )
+                                report += '<b>Response:</b> ' + err.responseText + '\n';
+                            $('#job-log').append(report);
+                        });
+                    }
+                });
+
+                $('#setmeshes').click(function() {
+                    var jobID   = $('#jobid').val();
+                    var meshPath  = $('#meshpath').val();
+
+                    function checkJobID() {
+                        // To check the job ID we create a Job object and then try
+                        // to get its status. The getStatus promise will be rejected
+                        // if the id is not valid:
+                        var printJob = new ADSKSpark.Job();
+                        printJob.id = jobID;
+                        return printJob.getStatus();
+                    }
+
+                    if( !jobID || !meshPath ) {
+                        $('#job-log').html('<b>Job ID and Mesh Path must be provided.</b>\n');
+                    }
+                    else {
+                        $('#job-log').html('Checking ID: ' + jobID + '... ');
+                        checkJobID()
+                        .then(function(job) {
+                            $('#job-log').append('\nCalling setMeshPaths... ');
+                            return job.setMeshPaths([meshPath]);
+                        })
+                        .then(function(job) {
+                                $('#job-log').append('\nCompleted.');
+                                $('#job-log').append('\njob_status: ' + job.status);
+                                $('#job-log').append('\nprinter_id: ' + job.printer_id);
+                                $('#job-log').append('\njob_data: ' + JSON.stringify(job.data));
+                                $('#job-log').append('\nsource_files: ' + JSON.stringify(job.getMeshPaths()));
                         })
                         .catch(function(err) {
                             var report = '<b>ERROR:</b> ' + err.message + '\n';
