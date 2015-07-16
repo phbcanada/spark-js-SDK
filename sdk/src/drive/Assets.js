@@ -311,8 +311,6 @@ var ADSKSpark = ADSKSpark || {};
          * @returns {Promise} - A promise that will resolve to an asset like response
          */
         createAssetComment: function(assetId,commentText){
-
-            console.log(commentText);
             //Make sure assetId is defined and that it is valid
             if (Helpers.isValidId(assetId)) {
                 var comment = 'comment=' + commentText;
