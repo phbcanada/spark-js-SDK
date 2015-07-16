@@ -329,6 +329,10 @@ var ADSKSpark = ADSKSpark || {};
                 }
                 return Promise.reject(new Error('No access_token supplied'));
             }
+        },
+
+        _switchApiURL: function (url) {
+            _apiUrl = url;
         }
     };
 
