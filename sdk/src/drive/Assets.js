@@ -286,6 +286,41 @@ var ADSKSpark = ADSKSpark || {};
             }
 
             return Promise.reject(new Error('Proper assetId was not supplied'));
+        },
+
+        /**
+         * @description - Toggle the current member's "Like" state for the current asset (setting it on/off)
+         * @memberOf ADSKSpark.Assets
+         * @param {Number} assetId - The ID of the asset
+         * @returns {Promise} - A promise that will resolve to an asset like response
+         */
+        updateLikeStatusForMember: function(assetId){
+
+            //Make sure assetId is defined and that it is valid
+            if (Helpers.isValidId(assetId)) {
+                return Client.authorizedApiRequest('/assets/' + assetId + '/likes').put();
+            }
+
+            return Promise.reject(new Error('Proper assetId was not supplied'));
+        },
+        /**
+         * @description - Toggle the current member's "Like" state for the current asset (setting it on/off)
+         * @memberOf ADSKSpark.Assets
+         * @param {Number} assetId - The ID of the asset
+         * @param {String} commentText - Comment text
+         * @returns {Promise} - A promise that will resolve to an asset like response
+         */
+        createAssetComment: function(assetId,commentText){
+
+            console.log(commentText);
+            //Make sure assetId is defined and that it is valid
+            if (Helpers.isValidId(assetId)) {
+                var comment = 'comment=' + commentText;
+                var headers = {'Content-type': 'application/x-www-form-urlencoded'};
+                return Client.authorizedApiRequest('/assets/' + assetId + '/comments').post(headers,comment);
+            }
+
+            return Promise.reject(new Error('Proper assetId was not supplied'));
         }
     };
 
