@@ -49,6 +49,22 @@ var ADSKSpark = ADSKSpark || {};
         },
 
         /**
+         * @description - Get asset comments
+         * @memberOf ADSKSpark.Assets
+         * @param {Number} assetId - The ID of the asset
+         * @returns {Promise} - A promise that will resolve to asset's comments
+         */
+        getPublicAssetComments: function(assetId){
+            //Make sure assetId is defined and that it is valid
+            if (Helpers.isValidId(assetId)) {
+                return Client.authorizedAsGuestApiRequest('/assets/' + assetId + '/comments').get();
+            }
+
+            return Promise.reject(new Error('Proper assetId was not supplied'));
+        },
+
+
+        /**
          * @description - Get a specific asset
          * @memberOf ADSKSpark.Assets
          * @param {Number} assetId - The ID of the asset
