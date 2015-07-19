@@ -5,6 +5,8 @@ This project adheres to [Autodesk Spark JS SDK](https://github.com/spark3dp/spar
 ## [Unreleased][unreleased]
 ### Changed
 - Add bower support
+- Added comments handling methods
+- Added toggle like support method
 
 ## [0.1.0] - 2015-07-14
 ### Added
