@@ -1,0 +1,32 @@
+{
+  "count":3,
+  "limit":20,
+  "offset":0,
+  "_link":"/assets/1474847/comments?limit=20&offset=0",
+  "comments":[
+    {
+      "body":"Comment1",
+      "member_small_avatar":"https://static.spark.autodesk.com/Beta/2015/01/28__19_36_23/IMG_20141022_14582522 .jpgec922c3e9f0711e49a2322000b210ce2.jpgf0d6bd11-ad25-11e4-9a23-22000b210ce2.jpg",
+      "comment_id":"C1EPHG3IBSXJTLR",
+      "member_name":"greg rashkevitch",
+      "member_id":20709989,
+      "timestamp":"July 19, 2015 11:55:09"
+    },
+    {
+      "body":"Comment2",
+      "member_small_avatar":"https://static.spark.autodesk.com/Beta/2015/01/28__19_36_23/IMG_20141022_14582522 .jpgec922c3e9f0711e49a2322000b210ce2.jpgf0d6bd11-ad25-11e4-9a23-22000b210ce2.jpg",
+      "comment_id":"CUK9H6OIBSXJTM9",
+      "member_name":"greg rashkevitch",
+      "member_id":20709989,
+      "timestamp":"July 19, 2015 12:01:30"
+    },
+    {
+      "body":"Because why not? i LOBE IT",
+      "member_small_avatar":"http://static.spark.autodesk.com/Images/Member/default_avatar .png",
+      "comment_id":"C64T1DWIBSXJTMH",
+      "member_name":"greg test",
+      "member_id":20714319,
+      "timestamp":"July 19, 2015 12:04:35"
+    }
+  ]
+}

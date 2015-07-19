@@ -3,7 +3,8 @@ describe('Assets', function () {
 
 	var Assets,Client, mockedAuthorizedRequest, mockedGuestAuthorizedRequest,mockedAccessTokenObj,mockedAccessTokenIsValid,
 		fakeAssetGetResponse, fakeAssetsGetResponse, fakeAssetCreateResponse, fakeAssetUpdateResponse,fakeAssetThumbnailsGetResponse,
-		fakeAssetSourcesGetResponse,fakeAssetThumbnailsCreateResponse,fakeAssetSourcesCreateResponse;
+		fakeAssetSourcesGetResponse,fakeAssetThumbnailsCreateResponse,fakeAssetSourcesCreateResponse,fakeAssetGetCommentsResponse,
+		fakeAssetLikeToggle,fakeAssetCommentCreateResponse,fakeAssetCommentUpdateResponse;
 
 	before(function () {
 		Assets = ADSKSpark.Assets;
@@ -25,16 +26,21 @@ describe('Assets', function () {
 		var getAssetJSON = __html__['test/mocks/getAsset.json'],
 			getAssetsJSON = __html__['test/mocks/getAssets.json'],
 			getAssetThumbnailsJSON = __html__['test/mocks/getAssetThumbnails.json'],
-			getAssetSourcesJSON = __html__['test/mocks/getAssetSources.json'];
+			getAssetSourcesJSON = __html__['test/mocks/getAssetSources.json'],
+			getAssetCommentsJSON = __html__['test/mocks/getAssetComments.json'];
 
 		fakeAssetGetResponse = JSON.parse(getAssetJSON);
 		fakeAssetsGetResponse = JSON.parse(getAssetsJSON);
+		fakeAssetGetCommentsResponse = JSON.parse(getAssetCommentsJSON);
 		fakeAssetCreateResponse = {"_link":"/assets/1478543","asset_id":1478543};
 		fakeAssetUpdateResponse = {"_link":"/assets/1478543"};
 		fakeAssetThumbnailsGetResponse = JSON.parse(getAssetThumbnailsJSON);
 		fakeAssetSourcesGetResponse = JSON.parse(getAssetSourcesJSON);
 		fakeAssetThumbnailsCreateResponse = {"_link": "/assets/1450326/thumbnails"};
 		fakeAssetSourcesCreateResponse = {"_link": "/assets/1450326/sources"};
+		fakeAssetLikeToggle = {"count":1,"is_member_like":true,"_link":"/assets/1474847/likes"};
+		fakeAssetCommentCreateResponse = {"comment_id":"CP2NAA9IBSXJTNI","_link":"/assets/1474847/comments"};
+		fakeAssetCommentUpdateResponse = {"_link":"/assets/1474847/comments"};
 
 	});
 
@@ -98,6 +104,22 @@ describe('Assets', function () {
 				expect(error).to.have.property('message');
 			});
 
+	});
+
+	it('should get public asset comments successfully', function () {
+		var assetId = 1474847;
+		//mock
+		mockedGuestAuthorizedRequest.withArgs('/assets/' + assetId + '/comments').returns({
+			get: function () {
+				return Promise.resolve(fakeAssetGetCommentsResponse);
+			}
+		});
+		return Assets.getPublicAssetComments(assetId).then(function (response) {
+			expect(response).to.have.property('count', 3);
+			expect(response).to.have.property('_link', '/assets/' + assetId + '/comments?limit=20&offset=0');
+			expect(response).to.have.property('comments');
+			expect(response.comments).to.have.length(3);
+		});
 	});
 
 	it('should get a user\'s asset successfully', function () {
@@ -293,6 +315,72 @@ describe('Assets', function () {
 		});
 
 		return Assets.deleteAssetSources(assetId,fileIds).then(function (response) {
+			expect(response).to.equal('');
+		});
+	});
+
+	it('should be able to toggle like on an asset', function () {
+
+		var assetId = 1474847;
+
+		//mock
+		mockedAuthorizedRequest.withArgs('/assets/' + assetId + '/likes').returns({
+			put: function (headers, params) {
+				return Promise.resolve(fakeAssetLikeToggle);
+			}
+		});
+
+		return Assets.updateLikeStatusForMember(assetId).then(function (response) {
+			expect(response).to.have.property('_link',fakeAssetLikeToggle._link);
+		});
+	});
+
+	it('should be able to create asset comment', function () {
+		var assetId = 123131,
+			commentText = 'Hello there friend!';
+		//mock
+		mockedAuthorizedRequest.withArgs('/assets/' + assetId + '/comments').returns({
+			post: function (headers, params) {
+				return Promise.resolve(fakeAssetCommentCreateResponse);
+			}
+		});
+
+		return Assets.createAssetComment(assetId,commentText).then(function (response) {
+			expect(response).to.have.property('_link',fakeAssetCommentCreateResponse._link);
+		});
+	});
+
+	it('should be able to update a comment of an asset', function () {
+		var assetId = 1474847,
+			commentId = 'CP2NAA9IBSXJTNI',
+			commentText = 'I think I was impolite in the previous comment';
+
+
+		//mock
+		mockedAuthorizedRequest.withArgs('/assets/' + assetId + '/comments').returns({
+			put: function (headers, params) {
+				return Promise.resolve(fakeAssetCommentUpdateResponse);
+			}
+		});
+
+		return Assets.updateAssetComment(assetId, commentId, commentText).then(function (response) {
+			expect(response).to.have.property('_link',fakeAssetCommentUpdateResponse._link);
+		});
+	});
+
+	it('should be able to remove a comment from an asset', function () {
+		var assetId = 1474847,
+			commentId = 'CP2NAA9IBSXJTNI';
+
+		var params = '?comment_id=' + commentId;
+		//mock
+		mockedAuthorizedRequest.withArgs('/assets/' + assetId + '/comments' + params).returns({
+			delete: function (headers, params) {
+				return Promise.resolve('');
+			}
+		});
+
+		return Assets.deleteAssetComment(assetId,commentId).then(function (response) {
 			expect(response).to.equal('');
 		});
 	});
