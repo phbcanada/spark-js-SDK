@@ -167,7 +167,7 @@
 	            var isServerLogin = (window.location.search.indexOf('code') != -1);
 
                 var options = {
-                    // apiRoot: 'https://api-alpha.spark.autodesk.com/api/v1',
+                    apiRoot: 'https://api-alpha.spark.autodesk.com/api/v1',
                     isProduction:false,
                     guestTokenUrl: GUEST_TOKEN_URL,
                     accessTokenUrl: ACCESS_TOKEN_URL,
@@ -195,6 +195,7 @@
                     var TEST_URL = 'http://localhost.autodesk.com:8080/api/v1';  // DO NOT COMMIT!!!
                     //===> ADSKSpark._injectMemberID = "20440630";
                     //===> Client._switchApiURL(TEST_URL);
+                    //===> $('#title').append(' ('+Client.getApiName()+')');
                 } else {
                     //user needs to login
                     $('#login-button').show();
