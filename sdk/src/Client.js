@@ -218,23 +218,19 @@ var ADSKSpark = ADSKSpark || {};
          */
         refreshAccessToken: function () {
             if (_refreshTokenUrl) {
-                var accessTokenObj = this.getAccessTokenObject();
-                if (accessTokenObj) {
 
-                    return ADSKSpark.Request(_refreshTokenUrl, null, {withCredentials: true})
-                        .get()
-                        .then(function (data) {
-                            if (!data.Error) {
-                                var now = Date.now();
-                                data.expires_at = now + parseInt(data.expires_in) * 1000;
-                                var clonedData = JSON.parse(JSON.stringify(data));
-                                delete(clonedData.refresh_token);
-                                localStorage.setItem(ACCESS_TOKEN_KEY, JSON.stringify(clonedData));
-                            }
-                            return data;
-                        });
-                }
-                return Promise.reject(new Error('Access token does not exist, you need to login again'));
+                return ADSKSpark.Request(_refreshTokenUrl, null, {withCredentials: true})
+                    .get()
+                    .then(function (data) {
+                        if (!data.Error) {
+                            var now = Date.now();
+                            data.expires_at = now + parseInt(data.expires_in) * 1000;
+                            var clonedData = JSON.parse(JSON.stringify(data));
+                            delete(clonedData.refresh_token);
+                            localStorage.setItem(ACCESS_TOKEN_KEY, JSON.stringify(clonedData));
+                        }
+                        return data;
+                    });
             }
             return Promise.reject(new Error('No Server Implementation'));
         },
