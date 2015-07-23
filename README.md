@@ -57,7 +57,7 @@ ADSKSpark.Client.initialize('<your app key>'); //<your app key> is a string cont
     };
 
 
-    ADSKSpark.Client.initialize('UZ7RoxoRJTYZOTdN1FkcE9F6rdAfYlFB',options);
+    ADSKSpark.Client.initialize('',options);
 
     /**
      * Open login window
