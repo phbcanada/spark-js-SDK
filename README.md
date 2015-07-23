@@ -33,16 +33,17 @@ ADSKSpark.Client.initialize('<your app key>'); //<your app key> is a string cont
 <!DOCTYPE html>
 <html>
   <head>
-	<title>Sample Code</title>
-	<meta charset="utf-8">
+  <title>Sample Code</title>
+  <meta charset="utf-8">
   </head>
   <body>
     <div class="content">
-        <a onclick="login()">Login</a>
-        <br/>
-        <a onclick="getGuestToken()">Get a guest token</a>
+        <button onclick="login()" id="login" style="display:none">Login</button>
+        <p id="user-data"></p>
+
     </div>
 
+    <script type="text/javascript" charset="utf-8" src="//code.jquery.com/jquery-2.1.3.min.js"></script>
     <script type="text/javascript" src="//code.spark.autodesk.com/autodesk-spark-sdk-0.1.1.min.js"></script>
     <script>
 
@@ -56,13 +57,13 @@ ADSKSpark.Client.initialize('<your app key>'); //<your app key> is a string cont
     };
 
 
-    ADSKSpark.Client.initialize('<your app key>',options);
+    ADSKSpark.Client.initialize('UZ7RoxoRJTYZOTdN1FkcE9F6rdAfYlFB',options);
 
     /**
      * Open login window
      */
     function login() {
-        ADSKSpark.Client.openLoginWindow();
+        window.location = ADSKSpark.Client.getLoginRedirectUrl();
     }
 
     function logout(){
@@ -70,21 +71,37 @@ ADSKSpark.Client.initialize('<your app key>'); //<your app key> is a string cont
         location.reload();
     }
 
-    function getGuestToken(){
-        ADSKSpark.Client.getGuestToken().then(function(guestToken) {
-            console.log('guest token: ',guestToken);
-        });
-    }
 
+    $(document).ready(function(){
+      if (ADSKSpark.Client.isAccessTokenValid()) {
+          console.log('access token: ',ADSKSpark.Client.getAccessToken());
+          ADSKSpark.Members.getMyProfile().then(function(response){
+            console.log('Current logged in member is: ', response.member);
+            $('#login').hide();
+            $('#user-data').html('<h4>User Data:</h4>' + JSON.stringify(response.member));
 
-    if (ADSKSpark.Client.isAccessTokenValid()) {
-        console.log('access token: ',ADSKSpark.Client.getAccessToken());
-        ADSKSpark.Members.getMyProfile().then(function(response){
-          console.log('Current logged in member is: ', response.member);
-        });
-    }
+          });
+      }else{
+        $('#login').show();
+        ADSKSpark.Client.completeLogin().then(function (token) {
+            console.log('Completed login with token: ' + token);
+
+            if (token) {
+              //You can redirect now to some page in your app or to homepage
+              // or to reload the top window or any other action
+              window.location.reload();
+            } else {
+              console.error('Problem with fetching token');
+            }
+
+          });
+      }
+    });
 
     </script>
   </body>
 </html>
 ```
+
+#### SDK Full Reference
+See <a href="https://spark.autodesk.com/developers/reference/sdk/javascript-sdk" target="_blank">here</a> for full reference
