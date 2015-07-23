@@ -22,7 +22,7 @@ To use the Spark JavaScript SDK you must first add an app on the Spark Developer
 
 ```JavaScript
 
-ADSKSpark.Client.initialize(APP_KEY); //APP_KEY is a string containing your Spark app key, provided during registration.
+ADSKSpark.Client.initialize('<your app key>'); //<your app key> is a string containing your Spark app key, provided during registration.
 ```
 
 * See the Sample Code section below for additional options.
