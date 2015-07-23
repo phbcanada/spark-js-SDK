@@ -3,7 +3,10 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Autodesk Spark JS SDK](https://github.com/spark3dp/spark-js-SDK).
 
 ## [Unreleased][unreleased]
-### Changed
+
+
+## [0.1.1] - 2015-07-23
+### Added
 - Add bower support
 - Added comments handling methods
 - Added toggle like support method

@@ -1,7 +1,7 @@
 {
   "name": "autodesk-spark-sdk",
   "description": "A web client SDK for the Spark REST APIs, providing a convenient interface for application developers, an abstract layer for the Spark APIs and a high-level functionality by chaining/callbacking APIs together",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Autodesk, Inc.",
   "license": "Apache 2.0",
   "dependencies": {
