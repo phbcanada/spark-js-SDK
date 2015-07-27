@@ -15,7 +15,7 @@ To use the Spark JavaScript SDK you must first add an app on the Spark Developer
 1) Include the SDK library in your HTML page just before closing the body section (`</body>`).
 
 ```HTML
-<script type="text/javascript" src="//code.spark.autodesk.com/autodesk-spark-sdk-0.1.1.min.js"></script>
+<script type="text/javascript" src="//code.spark.autodesk.com/autodesk-spark-sdk.min.js"></script>
 ```
 
 2) After including the SDK library, use the method ADSKSpark.Client.initialize() to initialize the SDK:<br>
@@ -44,7 +44,7 @@ ADSKSpark.Client.initialize('<your app key>'); //<your app key> is a string cont
     </div>
 
     <script type="text/javascript" charset="utf-8" src="//code.jquery.com/jquery-2.1.3.min.js"></script>
-    <script type="text/javascript" src="//code.spark.autodesk.com/autodesk-spark-sdk-0.1.1.min.js"></script>
+    <script type="text/javascript" src="//code.spark.autodesk.com/autodesk-spark-sdk.min.js"></script>
     <script>
 
     //Optional - Provide options
