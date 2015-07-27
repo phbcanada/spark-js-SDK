@@ -1,199 +1,217 @@
-describe('Client', function() {
+describe('Client', function () {
     'use strict';
 
-    var ASC, xhr, requests, fakeGuestToken, fakeAccessToken;
-    var testGuestUrl, testAccessUrl, testRefreshUrl, testApiUrl, testRedirectURI,testClientId;
+    var ASC, Request, mockedRequest, fakeGuestToken, fakeAccessToken, fakeRefreshToken;
+    var testGuestUrl, testAccessUrl, testRefreshUrl, testApiUrl, testRedirectURI, testClientId;
+    var ACCESS_TOKEN_KEY = 'spark-access-token',
+        GUEST_TOKEN_KEY = 'spark-guest-token';
 
 
-    before(function() {
+    before(function () {
         ASC = ADSKSpark.Client;
+        Request = ADSKSpark.Request;
+
         testGuestUrl = 'http://localhost/guest';
         testAccessUrl = 'http://localhost/access';
         testRefreshUrl = 'http://localhost/refresh';
-        testApiUrl = 'https://localhost';
+        testApiUrl = 'https://sandbox.localhost/test-api-url';
         testRedirectURI = 'https://localhost/callbackURI';
-        testClientId = 'this is not an ID';
+        testClientId = 'fake-client-id';
 
         fakeGuestToken = {
             access_token: 'this is a fake guest token',
             expires_in: 10000,
+            expires_at: Date.now() + 3600,
             issued_at: Date.now()
         };
 
         fakeAccessToken = {
             access_token: 'this is a fake access token',
             expires_in: 10000,
+            expires_at: Date.now() + 3600,
             issued_at: Date.now(),
             refresh_token: 'this is a fake refresh token',
             refresh_token_expires_in: 100000,
             refresh_token_issued_at: Date.now()
         };
 
-        ASC.initialize(testClientId, testGuestUrl, testAccessUrl, testRefreshUrl, testApiUrl,testRedirectURI);
+        fakeRefreshToken = fakeAccessToken;
 
-    });
+        mockedRequest = sinon.stub(ADSKSpark, 'Request');
 
-    beforeEach(function() {
-        localStorage.clear(); // Clear any tokens that were stored by the client
 
-        xhr = sinon.useFakeXMLHttpRequest();
-        requests = [];
-        xhr.onCreate = function(request) {
-            requests.push(request);
+        var options = {
+            apiRoot: testApiUrl,
+            redirectUri: testRedirectURI,
+            guestTokenUrl: testGuestUrl,
+            accessTokenUrl: testAccessUrl,
+            refreshTokenUrl: testRefreshUrl
         };
+        ASC.initialize(testClientId, options);
+
     });
 
-    afterEach(function() {
-        xhr.restore();
+    beforeEach(function () {
+        localStorage.clear(); // Clear any tokens that were stored by the client
     });
 
-    it('should exist', function() {
+
+    it('should exist', function () {
         Should.exist(ASC);
 
         ASC.should.be.Object.with.properties(
             [
                 'initialize',
-                'getGuestToken',
+                'getApiName',
                 'getLoginRedirectUrl',
-                'completeLogin',
                 'logout',
                 'isAccessTokenValid',
                 'getAccessTokenObject',
                 'getAccessToken',
+                'getGuestToken',
+                'refreshAccessToken',
                 'authorizedApiRequest',
                 'authorizedAsGuestApiRequest',
-                'openLoginWindow'
+                'openLoginWindow',
+                'completeLogin'
             ]
         );
     });
 
-    //@todo: Complete these tests to work with the new Client.js and Request.js
-    /*
-    it('should get guest token', function() {
-        requests.length.should.equal(0);
+    it('should return correct api name', function () {
+        expect(ASC.getApiName()).to.equal('sandbox');
+    });
+
+    it('should return correct login redirect url', function () {
+        var expectedUrlImplicit = testApiUrl + '/oauth/authorize?response_type=token&client_id=' +
+            testClientId + '&redirect_uri=' + testRedirectURI;
+
+        var expectedUrlExplicit = testApiUrl + '/oauth/authorize?response_type=code&client_id=' +
+            testClientId + '&redirect_uri=' + testRedirectURI;
+
+        expect(ASC.getLoginRedirectUrl()).to.equal(expectedUrlImplicit);
+        expect(ASC.getLoginRedirectUrl(false, false)).to.equal(expectedUrlImplicit);
+        expect(ASC.getLoginRedirectUrl(true, false)).to.equal(expectedUrlImplicit + '&register=true');
+        expect(ASC.getLoginRedirectUrl(false, true)).to.equal(expectedUrlExplicit);
+        expect(ASC.getLoginRedirectUrl(true, true)).to.equal(expectedUrlExplicit + '&register=true')
+    });
+
+
+
+    it('should be able to logout', function(){
+        localStorage.setItem(ACCESS_TOKEN_KEY, JSON.stringify(fakeAccessToken));
+        expect(ASC.getAccessTokenObject()).to.have.property('access_token',fakeAccessToken.access_token);
+        ASC.logout();
+        expect(ASC.getAccessTokenObject()).to.equal(null);
+    });
+
+    it('should be able to return the correct status of the access token', function(){
+        expect(ASC.isAccessTokenValid()).to.not.be.ok
+        localStorage.setItem(ACCESS_TOKEN_KEY, JSON.stringify(fakeAccessToken));
+        expect(ASC.isAccessTokenValid()).to.be.ok;
+        ASC.logout();
+        expect(ASC.isAccessTokenValid()).to.not.be.ok;
+    });
+
+    it('should be able to return the access token object', function(){
+        localStorage.setItem(ACCESS_TOKEN_KEY, JSON.stringify(fakeAccessToken));
+        expect(ASC.getAccessTokenObject()).to.have.property('access_token',fakeAccessToken.access_token);
+    });
+
+    it('should be able to return the access token', function(){
+        localStorage.setItem(ACCESS_TOKEN_KEY, JSON.stringify(fakeAccessToken));
+        expect(ASC.getAccessToken()).to.equal(fakeAccessToken.access_token);
+    });
+
+    it('should be able to return the guest token from local storage', function(){
+        localStorage.setItem(GUEST_TOKEN_KEY, JSON.stringify(fakeGuestToken));
 
         var promise = ASC.getGuestToken();
 
-        promise.should.be.instanceOf(Promise);
+        // Check promise
+        return promise.then(function(guestToken) {
+            expect(guestToken).to.be.ok;
+            expect(guestToken).to.equal(fakeGuestToken.access_token);
+        });
 
-        // Make sure a request was sent
-        requests.length.should.equal(1);
-        var xhr = requests[0];
-        xhr.url.should.equal(testGuestUrl);
-        xhr.method.should.equal('GET');
+    });
 
-        // Respond with fake token
-        xhr.respond(200, {'Content-Type': 'application/json'}, JSON.stringify(fakeGuestToken));
+    it('should be able to return the access token when asking for a non existing guest token', function(){
+        localStorage.setItem(ACCESS_TOKEN_KEY, JSON.stringify(fakeAccessToken));
+        var promise = ASC.getGuestToken();
 
         // Check promise
-        return promise.then(function(data) {
-            var guestToken = data;
-
-            Should.exist(guestToken);
-            fakeGuestToken.access_token.should.equal(guestToken);
-
-            // Should be able to get the same token again without a request being sent
-            var secondPromise = ASC.getGuestToken();
-
-            requests.length.should.equal(1);
-
-            return secondPromise.then(function(data) {
-                guestToken.should.equal(data);
-            });
+        return promise.then(function(accessToken) {
+            expect(accessToken).to.be.ok;
+            expect(accessToken).to.equal(fakeAccessToken.access_token);
         });
     });
 
-    it('should get access token', function() {
-        requests.length.should.equal(0);
+    it('should be able to refresh the access token', function(){
 
-        // We shouldn't already have a token
-        Should(ASC.getAccessToken()).equal(null);
-        ASC.isAccessTokenValid().should.equal(false);
-
-        var promise = ASC.completeLogin('ACODE');
-        promise.should.be.instanceOf(Promise);
-
-        // Make sure the request was sent
-        requests.length.should.equal(1);
-        var xhr = requests[0];
-        xhr.url.should.equal(testAccessUrl + '?code=ACODE&redirect_uri=' + encodeURIComponent(testRedirectURI));
-        xhr.method.should.equal('GET');
-
-        // Respond with fake token
-        xhr.respond(200, {'Content-Type': 'application/json'}, JSON.stringify(fakeAccessToken));
-
-        // Check promise
-        return promise.then(function(data) {
-            var accessToken = data;
-
-            Should.exist(accessToken);
-            fakeAccessToken.access_token.should.equal(accessToken);
-            accessToken.should.equal(ASC.getAccessToken());
-
-            // We should now have a valid token
-            ASC.isAccessTokenValid().should.equal(true);
-
-            ASC.logout();
-            ASC.isAccessTokenValid().should.equal(false);
-        });
-    });
-
-    it('should refresh access token', function() {
-        requests.length.should.equal(0);
-
-        var getAccessTokenSuccessMock = sinon.stub(ASC,'getAccessTokenObject').returns({
-            refresh_token: 'AREFRESHTOKEN'
+        mockedRequest.returns({
+            get: function () {
+                return Promise.resolve(fakeRefreshToken);
+            }
         });
 
         var promise = ASC.refreshAccessToken();
-        promise.should.be.instanceOf(Promise);
-
-        // Make sure the request was sent
-        requests.length.should.equal(1);
-        var xhr = requests[0];
-        xhr.url.should.equal(testRefreshUrl + '?refresh_token=AREFRESHTOKEN');
-        xhr.method.should.equal('GET');
-
-        // Respond with fake token
-        xhr.respond(200, {'Content-Type': 'application/json'}, JSON.stringify(fakeAccessToken));
 
         // Check promise
-        return promise.then(function(data) {
-            var accessToken = data.access_token;
-
-            Should.exist(accessToken);
-            fakeAccessToken.access_token.should.equal(accessToken);
-            accessToken.should.equal(ASC.getAccessToken());
-
-            // We should now have a valid token
-            ASC.isAccessTokenValid().should.equal(true);
-
-            ASC.logout();
-            ASC.isAccessTokenValid().should.equal(false);
-            getAccessTokenSuccessMock.restore();
+        return promise.then(function(token) {
+            expect(token).to.have.property('access_token',fakeRefreshToken.access_token);
+            expect(token).to.have.property('refresh_token');
+            expect(ASC.isAccessTokenValid()).to.be.ok;
+            expect(ASC.getAccessTokenObject()).to.have.property('access_token',fakeRefreshToken.access_token);
+            expect(ASC.getAccessTokenObject()).to.not.have.property('refresh_token');
         });
     });
 
-    it('should reject a refresh access token request when access token is empty', function() {
-        requests.length.should.equal(0);
+    it('should be able to perform authorized api request', function(){
 
-        var getAccessTokenFailureMock = sinon.stub(ASC,'getAccessTokenObject').returns(null);
+        //get my assets mock data
+        var getAssetsJSON = __html__['test/mocks/getAssets.json'],
+            fakeAssetsGetResponse = JSON.parse(getAssetsJSON);
 
-        var promise = ASC.refreshAccessToken();
-        promise.should.be.instanceOf(Promise);
+        mockedRequest.returns(Promise.resolve(fakeAssetsGetResponse));
 
-        // Make sure no request was sent
-        requests.length.should.equal(0);
+        var promise = ASC.authorizedApiRequest('/members/member-id/assets');
 
-		// Check promise
-		return promise
-			.then(function (data) {
-			})
-			.catch(function (error) {
-				expect(error).to.be.an.instanceof(Object);
-				expect(error).to.have.property('message');
-				getAccessTokenFailureMock.restore();
-			});
-	});
-	*/
+        // Check promise
+        return promise.then(function(response) {
+            expect(response).to.have.property('assets', fakeAssetsGetResponse.assets);
+            expect(response).to.have.property('count', fakeAssetsGetResponse.count);
+            expect(response.assets).to.have.length(fakeAssetsGetResponse.count);
+        });
+    });
+
+    it('should be able to perform guest authorized api request', function(){
+
+        //get my assets mock data
+        var getAssetsJSON = __html__['test/mocks/getAssets.json'],
+            fakeAssetsGetResponse = JSON.parse(getAssetsJSON);
+
+        mockedRequest.returns(Promise.resolve(fakeAssetsGetResponse));
+
+        var promise = ASC.authorizedAsGuestApiRequest('/assets');
+
+        // Check promise
+        return promise.then(function(response) {
+            expect(response).to.have.property('assets', fakeAssetsGetResponse.assets);
+            expect(response).to.have.property('count', fakeAssetsGetResponse.count);
+            expect(response.assets).to.have.length(fakeAssetsGetResponse.count);
+        });
+    });
+
+    it('should be able to open a login window', function(){
+        var Helpers = ADSKSpark.Helpers;
+        sinon.spy(Helpers, 'popupWindow');
+        ASC.openLoginWindow();
+        expect(Helpers.popupWindow.calledOnce).to.be.ok;
+
+        var expectedUrlImplicit = testApiUrl + '/oauth/authorize?response_type=token&client_id=' +
+            testClientId + '&redirect_uri=' + testRedirectURI;
+
+        expect(Helpers.popupWindow.getCall(0).args[0]).to.equal(expectedUrlImplicit);
+    });
 });
