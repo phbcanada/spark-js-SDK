@@ -202,10 +202,16 @@ var ADSKSpark = ADSKSpark || {};
          * @returns {Promise} - A promise that resolves to the guest token.
          */
         getGuestToken: function () {
-            var guestToken = JSON.parse(localStorage.getItem(GUEST_TOKEN_KEY));
+            var token = JSON.parse(localStorage.getItem(GUEST_TOKEN_KEY));
             var now = Date.now();
-            if (guestToken && guestToken.expires_at && guestToken.expires_at > now) {
-                return Promise.resolve(guestToken.access_token);
+
+            //if guest token is not implemented try to use access token
+            if (!token){
+                token = JSON.parse(localStorage.getItem(ACCESS_TOKEN_KEY));
+            }
+
+            if (token && token.expires_at && token.expires_at > now) {
+                return Promise.resolve(token.access_token);
             }
 
             return getGuestTokenFromServer();
