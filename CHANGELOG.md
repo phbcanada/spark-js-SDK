@@ -5,11 +5,14 @@ This project adheres to [Autodesk Spark JS SDK](https://github.com/spark3dp/spar
 ## [Unreleased][unreleased]
 
 
-## [0.1.1] - 2015-07-23
+## [0.1.1] - 2015-07-27
 ### Added
 - Add bower support
 - Added comments handling methods
 - Added toggle like support method
+
+### Changed
+- Allow using guest token calls with access token (for users that don't implement server with guest token endpoint with implicit login implementation)
 
 ## [0.1.0] - 2015-07-14
 ### Added
