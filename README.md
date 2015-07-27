@@ -103,5 +103,11 @@ ADSKSpark.Client.initialize('<your app key>'); //<your app key> is a string cont
 </html>
 ```
 
+#### Getting a local version of this SDK
+You can also get this code with Bower:
+```
+bower install autodesk-spark-sdk
+```
+
 #### SDK Full Reference
 See <a href="https://spark.autodesk.com/developers/reference/sdk/javascript-sdk" target="_blank">here</a> for full reference
