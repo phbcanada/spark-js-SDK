@@ -171,6 +171,11 @@ var ADSKSpark = ADSKSpark || {};
             var accessToken = JSON.parse(localStorage.getItem(ACCESS_TOKEN_KEY));
             var now = Date.now();
 
+            //if access token is not valid, remove it from localStorage
+            if (accessToken && accessToken.expires_at && accessToken.expires_at < now){
+                this.logout();
+            }
+
             return !!(accessToken && accessToken.expires_at && accessToken.expires_at > now);
         },
 
