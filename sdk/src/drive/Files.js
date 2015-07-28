@@ -40,6 +40,8 @@ var ADSKSpark = ADSKSpark || {};
          *                          file: The actual file data that is passed in the body
          *                          unzip: Should we treat the upload as a zip of multiple files
          *                          public: If it has full public URL for everyone's access
+         *                          fileName: If we use fileUrl attribute
+         *                          fileUrl: If we are using file url instead of the actual file
          * @returns {Promise} - A promise that will resolve to a file object response
          */
         uploadFile: function (fileData) {
@@ -49,6 +51,14 @@ var ADSKSpark = ADSKSpark || {};
 
             var unzip = fileData.unzip ? fileData.unzip : false;
             fd.append('unzip', unzip);
+
+	        if(fileData.fileUrl){
+		        fd.append('fileurl',fileData.fileUrl);
+	        }
+
+	        if(fileData.fileName) {
+		        fd.append('filename', fileData.fileName);
+	        }
 
             if (fileData.public) {
                 fd.append('public', fileData.public);
