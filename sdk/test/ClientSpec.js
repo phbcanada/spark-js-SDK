@@ -51,6 +51,10 @@ describe('Client', function () {
 
     });
 
+    after(function(){
+        mockedRequest.restore();
+    });
+
     beforeEach(function () {
         localStorage.clear(); // Clear any tokens that were stored by the client
     });
@@ -97,15 +101,14 @@ describe('Client', function () {
     });
 
 
-
-    it('should be able to logout', function(){
+    it('should be able to logout', function () {
         localStorage.setItem(ACCESS_TOKEN_KEY, JSON.stringify(fakeAccessToken));
-        expect(ASC.getAccessTokenObject()).to.have.property('access_token',fakeAccessToken.access_token);
+        expect(ASC.getAccessTokenObject()).to.have.property('access_token', fakeAccessToken.access_token);
         ASC.logout();
         expect(ASC.getAccessTokenObject()).to.equal(null);
     });
 
-    it('should be able to return the correct status of the access token', function(){
+    it('should be able to return the correct status of the access token', function () {
         expect(ASC.isAccessTokenValid()).to.not.be.ok
         localStorage.setItem(ACCESS_TOKEN_KEY, JSON.stringify(fakeAccessToken));
         expect(ASC.isAccessTokenValid()).to.be.ok;
@@ -113,41 +116,41 @@ describe('Client', function () {
         expect(ASC.isAccessTokenValid()).to.not.be.ok;
     });
 
-    it('should be able to return the access token object', function(){
+    it('should be able to return the access token object', function () {
         localStorage.setItem(ACCESS_TOKEN_KEY, JSON.stringify(fakeAccessToken));
-        expect(ASC.getAccessTokenObject()).to.have.property('access_token',fakeAccessToken.access_token);
+        expect(ASC.getAccessTokenObject()).to.have.property('access_token', fakeAccessToken.access_token);
     });
 
-    it('should be able to return the access token', function(){
+    it('should be able to return the access token', function () {
         localStorage.setItem(ACCESS_TOKEN_KEY, JSON.stringify(fakeAccessToken));
         expect(ASC.getAccessToken()).to.equal(fakeAccessToken.access_token);
     });
 
-    it('should be able to return the guest token from local storage', function(){
+    it('should be able to return the guest token from local storage', function () {
         localStorage.setItem(GUEST_TOKEN_KEY, JSON.stringify(fakeGuestToken));
 
         var promise = ASC.getGuestToken();
 
         // Check promise
-        return promise.then(function(guestToken) {
+        return promise.then(function (guestToken) {
             expect(guestToken).to.be.ok;
             expect(guestToken).to.equal(fakeGuestToken.access_token);
         });
 
     });
 
-    it('should be able to return the access token when asking for a non existing guest token', function(){
+    it('should be able to return the access token when asking for a non existing guest token', function () {
         localStorage.setItem(ACCESS_TOKEN_KEY, JSON.stringify(fakeAccessToken));
         var promise = ASC.getGuestToken();
 
         // Check promise
-        return promise.then(function(accessToken) {
+        return promise.then(function (accessToken) {
             expect(accessToken).to.be.ok;
             expect(accessToken).to.equal(fakeAccessToken.access_token);
         });
     });
 
-    it('should be able to refresh the access token', function(){
+    it('should be able to refresh the access token', function () {
 
         mockedRequest.returns({
             get: function () {
@@ -158,16 +161,16 @@ describe('Client', function () {
         var promise = ASC.refreshAccessToken();
 
         // Check promise
-        return promise.then(function(token) {
-            expect(token).to.have.property('access_token',fakeRefreshToken.access_token);
+        return promise.then(function (token) {
+            expect(token).to.have.property('access_token', fakeRefreshToken.access_token);
             expect(token).to.have.property('refresh_token');
             expect(ASC.isAccessTokenValid()).to.be.ok;
-            expect(ASC.getAccessTokenObject()).to.have.property('access_token',fakeRefreshToken.access_token);
+            expect(ASC.getAccessTokenObject()).to.have.property('access_token', fakeRefreshToken.access_token);
             expect(ASC.getAccessTokenObject()).to.not.have.property('refresh_token');
         });
     });
 
-    it('should be able to perform authorized api request', function(){
+    it('should be able to perform authorized api request', function () {
 
         //get my assets mock data
         var getAssetsJSON = __html__['test/mocks/getAssets.json'],
@@ -178,14 +181,14 @@ describe('Client', function () {
         var promise = ASC.authorizedApiRequest('/members/member-id/assets');
 
         // Check promise
-        return promise.then(function(response) {
+        return promise.then(function (response) {
             expect(response).to.have.property('assets', fakeAssetsGetResponse.assets);
             expect(response).to.have.property('count', fakeAssetsGetResponse.count);
             expect(response.assets).to.have.length(fakeAssetsGetResponse.count);
         });
     });
 
-    it('should be able to perform guest authorized api request', function(){
+    it('should be able to perform guest authorized api request', function () {
 
         //get my assets mock data
         var getAssetsJSON = __html__['test/mocks/getAssets.json'],
@@ -196,14 +199,14 @@ describe('Client', function () {
         var promise = ASC.authorizedAsGuestApiRequest('/assets');
 
         // Check promise
-        return promise.then(function(response) {
+        return promise.then(function (response) {
             expect(response).to.have.property('assets', fakeAssetsGetResponse.assets);
             expect(response).to.have.property('count', fakeAssetsGetResponse.count);
             expect(response.assets).to.have.length(fakeAssetsGetResponse.count);
         });
     });
 
-    it('should be able to open a login window', function(){
+    it('should be able to open a login window', function () {
         var Helpers = ADSKSpark.Helpers;
         sinon.spy(Helpers, 'popupWindow');
         ASC.openLoginWindow();
@@ -213,5 +216,43 @@ describe('Client', function () {
             testClientId + '&redirect_uri=' + testRedirectURI;
 
         expect(Helpers.popupWindow.getCall(0).args[0]).to.equal(expectedUrlImplicit);
+    });
+
+    it('should be able to complete login for an explicit flow', function () {
+        window.history.replaceState({}, 'test title', 'http://localhost:9876/?code=foobar');
+
+        mockedRequest.returns({
+            get: function () {
+                return Promise.resolve(fakeAccessToken);
+            }
+        });
+
+        var promise = ASC.completeLogin(true);
+
+        // Check promise
+        return promise.then(function (response) {
+            expect(response).to.equal(fakeAccessToken.access_token);
+            expect(ASC.isAccessTokenValid()).to.be.ok;
+        });
+
+    });
+
+    it('should be able to complete login for an implicit flow', function () {
+        window.history.replaceState({}, 'test title', 'http://localhost:9876/#access_token=' + fakeAccessToken.access_token + '&expires_in=' + 10000);
+
+        mockedRequest.returns({
+            get: function () {
+                return Promise.resolve(fakeAccessToken);
+            }
+        });
+
+        var promise = ASC.completeLogin();
+
+        // Check promise
+        return promise.then(function (response) {
+            expect(response).to.equal(fakeAccessToken.access_token);
+            expect(ASC.isAccessTokenValid()).to.be.ok;
+        });
+
     });
 });

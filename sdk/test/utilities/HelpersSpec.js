@@ -5,6 +5,7 @@ describe('Helpers', function () {
 
 	before(function () {
 		Helpers = ADSKSpark.Helpers;
+		window.history.replaceState({}, 'test title', 'http://localhost:9876');
 	});
 
 	it('should exist', function () {
