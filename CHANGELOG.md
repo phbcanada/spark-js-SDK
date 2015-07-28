@@ -4,12 +4,12 @@ This project adheres to [Autodesk Spark JS SDK](https://github.com/spark3dp/spar
 
 ## [Unreleased][unreleased]
 
-
-## [0.1.1] - 2015-07-27
+## [0.1.1] - 2015-07-28
 ### Added
 - Add bower support
 - Added comments handling methods
 - Added toggle like support method
+- Added support to upload files from URL
 
 ### Changed
 - Allow using guest token calls with access token (for users that don't implement server with guest token endpoint with implicit login implementation)
@@ -50,5 +50,5 @@ This project adheres to [Autodesk Spark JS SDK](https://github.com/spark3dp/spar
 - Some Print API implementation, mainly mesh related methods
 - Added grunt to the SDK with initial build tasks
 
-[unreleased]: https://github.com/spark3dp/spark-js-SDK/compare/v0.1.0...develop
+[unreleased]: https://github.com/spark3dp/spark-js-SDK/compare/v0.1.1...develop
 [0.1.0]: https://github.com/spark3dp/spark-js-SDK/compare/v0.0.2...v0.1.0
