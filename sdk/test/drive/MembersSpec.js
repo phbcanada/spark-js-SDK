@@ -1,17 +1,19 @@
 describe('Members', function () {
 	'use strict';
 
-	var Members, mockedAuthorizedRequest, fakeMember;
+	var Members,Client, mockedAuthorizedRequest, mockedAccessTokenIsValid, fakeMember;
 
 
 	before(function () {
 		Members = ADSKSpark.Members;
-		var Client = ADSKSpark.Client;
+		Client = ADSKSpark.Client;
 		mockedAuthorizedRequest = sinon.stub(Client, 'authorizedApiRequest');
+		mockedAccessTokenIsValid = sinon.stub(Client,'isAccessTokenValid');
 	});
 
 	after(function(){
 		mockedAuthorizedRequest.restore();
+		mockedAccessTokenIsValid.restore();
 	});
 
 	beforeEach(function () {
@@ -27,12 +29,15 @@ describe('Members', function () {
 				}
 			}
 		};
+
+		localStorage.clear();
 	});
 
 	it('should exist', function () {
 		expect(Members).to.exist;
 		expect(Members).to.have.property('getMemberProfile');
 		expect(Members).to.have.property('getMyProfile');
+		expect(Members).to.have.property('getLoggedInMemberId');
 	});
 
 
@@ -69,7 +74,7 @@ describe('Members', function () {
 	});
 
 	it('should get a member\'s own profile', function () {
-
+		mockedAccessTokenIsValid.returns(true);
 		//mock
 		mockedAuthorizedRequest.withArgs('/members').returns({
 			get: function () {
@@ -83,6 +88,21 @@ describe('Members', function () {
 			expect(response.member).to.have.property('first_name', fakeMember.member.first_name);
 			expect(response.member).to.have.property('last_name', fakeMember.member.last_name);
 			expect(response.member).to.have.deep.property('profile.avatar_path', fakeMember.member.profile.avatar_path);
+		});
+
+	});
+
+	it('should get a memberId of the logged in member', function () {
+
+		//mock
+		mockedAuthorizedRequest.withArgs('/members').returns({
+			get: function () {
+				return Promise.resolve(fakeMember);
+			}
+		});
+
+		return Members.getLoggedInMemberId().then(function (response) {
+			expect(response).to.equal(fakeMember.member.id);
 		});
 
 	});

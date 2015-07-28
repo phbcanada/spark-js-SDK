@@ -90,10 +90,6 @@ var ADSKSpark = ADSKSpark || {};
         getMyAssets: function (params) {
 
             if (Client.isAccessTokenValid()) {
-                var accessTokenObj = Client.getAccessTokenObject();
-
-                var memberId = accessTokenObj.spark_member_id;
-
                 //default limit/offset
                 var defaultParams = {
                     limit: listDefaultLimit,
@@ -110,10 +106,14 @@ var ADSKSpark = ADSKSpark || {};
 
                 var passedParams = Helpers.mergeObjects(defaultParams, params);
 
-                //Make sure memberId is defined and that it is valid
-                if (Helpers.isValidId(memberId)) {
-                    return Client.authorizedApiRequest('/members/' + memberId + '/assets').get(null, passedParams);
-                }
+                return ADSKSpark.Members.getLoggedInMemberId().then(function(memberId) {
+                    //Make sure memberId is defined and that it is valid
+                    if (Helpers.isValidId(memberId)) {
+                        return Client.authorizedApiRequest('/members/' + memberId + '/assets').get(null, passedParams);
+                    }
+
+                    return Promise.reject(new Error('Member ID is invalid'));
+                });
             }
 
             return Promise.reject(new Error('Access token is invalid'));

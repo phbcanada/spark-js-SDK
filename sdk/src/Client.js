@@ -3,17 +3,18 @@ var ADSKSpark = ADSKSpark || {};
 (function () {
     'use strict';
 
-    var Helpers = ADSKSpark.Helpers;
+    var Constants = ADSKSpark.Constants,
+        Helpers = ADSKSpark.Helpers;
 
-    var GUEST_TOKEN_KEY = 'spark-guest-token';
-    var ACCESS_TOKEN_KEY = 'spark-access-token';
+    var GUEST_TOKEN_KEY = 'spark-guest-token',
+        ACCESS_TOKEN_KEY = 'spark-access-token';
 
-    var _clientId = '';
-    var _apiUrl = '';
-    var _guestTokenUrl = '';
-    var _accessTokenUrl = '';
-    var _refreshTokenUrl = '';
-    var _redirectUri = '';
+    var _clientId = '',
+        _apiUrl = '',
+        _guestTokenUrl = '',
+        _accessTokenUrl = '',
+        _refreshTokenUrl = '',
+        _redirectUri = '';
 
     /**
      * Gets an access_token and stores it in localStorage, afterwards returns a promise that resolves to the guest token.
@@ -105,7 +106,7 @@ var ADSKSpark = ADSKSpark || {};
         initialize: function (appKey, options) {
             _clientId = appKey;
             _apiUrl = (options && options.apiRoot) ? options.apiRoot :
-                      (options && options.isProduction) ? ADSKSpark.Constants.API_HOST_PROD : ADSKSpark.Constants.API_HOST_SANDBOX;
+                (options && options.isProduction) ? ADSKSpark.Constants.API_HOST_PROD : ADSKSpark.Constants.API_HOST_SANDBOX;
             _redirectUri = options && options.redirectUri ? options.redirectUri : null;
             _guestTokenUrl = options && options.guestTokenUrl ? options.guestTokenUrl : null;
             _accessTokenUrl = options && options.accessTokenUrl ? options.accessTokenUrl : null;
@@ -119,12 +120,12 @@ var ADSKSpark = ADSKSpark || {};
          */
         getApiName: function () {
             var name = '';
-            if( _apiUrl) {
+            if (_apiUrl) {
                 var split = _apiUrl.split('//');
-                if( split.length > 1 ) {
+                if (split.length > 1) {
                     name = split[1].split('.')[0];
                 }
-                if( name === 'api' ) {
+                if (name === 'api') {
                     name = 'production';
                 }
             }
@@ -160,6 +161,7 @@ var ADSKSpark = ADSKSpark || {};
          */
         logout: function () {
             localStorage.removeItem(ACCESS_TOKEN_KEY);
+            localStorage.removeItem(Constants.MEMBER_KEY);
         },
 
         /**
@@ -172,7 +174,7 @@ var ADSKSpark = ADSKSpark || {};
             var now = Date.now();
 
             //if access token is not valid, remove it from localStorage
-            if (accessToken && accessToken.expires_at && accessToken.expires_at < now){
+            if (accessToken && accessToken.expires_at && accessToken.expires_at < now) {
                 this.logout();
             }
 
@@ -211,7 +213,7 @@ var ADSKSpark = ADSKSpark || {};
             var now = Date.now();
 
             //if guest token is not implemented try to use access token
-            if (!token){
+            if (!token) {
                 token = JSON.parse(localStorage.getItem(ACCESS_TOKEN_KEY));
             }
 
