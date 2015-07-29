@@ -10,6 +10,7 @@ This project adheres to [Autodesk Spark JS SDK](https://github.com/spark3dp/spar
 - Added comments handling methods
 - Added toggle like support method
 - Added support to upload files from URL
+- Support storing of the current member in localStorage
 
 ### Changed
 - Allow using guest token calls with access token (for users that don't implement server with guest token endpoint with implicit login implementation)
