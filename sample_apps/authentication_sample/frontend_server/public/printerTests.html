@@ -53,6 +53,22 @@
         <br>
         <div class="container">
             <div class="col-md-8 col-md-offset-3">
+                <div id="test-wrapper-download-test">
+                    <h4>Spark Drive Download</h4>
+
+                    <div class="col-md-10 col-md-offset-1">
+                        <label>File ID: </label><input type="text" id="fileId" name="fileId" class="required"><br>
+                        <button id="download" class="btn btn-primary">Download File</button>
+                        <p>
+                        <pre id="download-result"></pre>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="container">
+            <div class="col-md-8 col-md-offset-3">
                 <div id="test-wrapper-printer-list">
                     <h4>Spark SDK Printers</h4>
 
@@ -129,6 +145,7 @@
         <script type="text/javascript" charset="utf-8" src="config/Constants.js"></script>
         <script type="text/javascript" charset="utf-8" src="Client.js"></script>
         <script type="text/javascript" charset="utf-8" src="drive/Members.js"></script>
+        <script type="text/javascript" charset="utf-8" src="drive/Files.js"></script>
         <script type="text/javascript" charset="utf-8" src="PrintDB.js"></script>
         <script type="text/javascript" charset="utf-8" src="Printer.js"></script>
         <script type="text/javascript" charset="utf-8" src="MeshAPI.js"></script>
@@ -167,7 +184,7 @@
 	            var isServerLogin = (window.location.search.indexOf('code') != -1);
 
                 var options = {
-                    apiRoot: 'https://api-alpha.spark.autodesk.com/api/v1',
+                    // apiRoot: 'https://api-alpha.spark.autodesk.com/api/v1',
                     isProduction:false,
                     guestTokenUrl: GUEST_TOKEN_URL,
                     accessTokenUrl: ACCESS_TOKEN_URL,
@@ -260,6 +277,17 @@
                             $('#reg-log').append(report);
                         });
                     }
+                });
+
+                $('#download').click(function() {
+                    var fileId = $('#fileId').val();
+                    $('#download-result').text('Download ' + fileId + '\n');
+                    ADSKSpark.Files.downloadFile(fileId).then(function(result) {
+                        $('#download-result').append('Got: ' + result.arraybuffer.length);
+                    })
+                    .catch( function(error) {
+                        $('#download-result').text(error.message);
+                    });
                 });
 
                 $('#printers').click(function() {
@@ -461,6 +489,7 @@
                             $('#job-log').append('\njob_status: ' + job.status);
                             $('#job-log').append('\njob_comment: ' + job.data.job_comment);
                             $('#job-log').append('\njob_custom_data: ' + JSON.stringify(job.data.job_custom_data));
+                            $('#job-log').append('\njob_data: ' + JSON.stringify(job.data.job_data));
                         })
                         .catch(function(err) {
                             var report = '<b>ERROR:</b> ' + err.message + '\n';
