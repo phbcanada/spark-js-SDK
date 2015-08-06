@@ -114,7 +114,18 @@ var ADSKSpark = ADSKSpark || {};
                         var error = new Error(xhr.statusText);
                         error.status = xhr.status;
                         error.statusText = xhr.statusText;
-                        error.responseText = xhr.responseText;
+                        if (xhr.responseType === 'arraybuffer') {
+                            var response = new Uint8Array(xhr.response);
+                            error.responseText = String.fromCharCode.apply(null, response);
+                            try {
+                                var err = JSON.parse(error.responseText);
+                                error = err;
+                            } catch(ex) {
+                            }
+                        }
+                        else {
+                            error.responseText = xhr.responseText;
+                        }
                         reject(error);
                     }
                 };
